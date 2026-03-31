@@ -80,7 +80,7 @@
             <div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-white font-black shadow-lg">CIA</div>
             <div>
                 <h1 class="text-xl font-black tracking-tight text-slate-800">美味中情局</h1>
-                <p class="text-[10px] mono text-orange-600 uppercase tracking-widest leading-none">INTEL LOG V2.2</p>
+                <p class="text-[10px] mono text-orange-600 uppercase tracking-widest leading-none">INTEL LOG V2.3</p>
             </div>
         </div>
         <div id="authStatus" class="text-[10px] mono text-slate-400">CONNECTING...</div>
@@ -231,6 +231,10 @@
                 </div>
 
                 <div class="border-t border-slate-100 pt-4 mt-2">
+                    <button type="button" onclick="window.smartPaste()" class="w-full bg-blue-50 text-blue-700 border border-blue-200 rounded-xl py-3 mb-4 text-[11px] font-bold flex items-center justify-center gap-2 hover:bg-blue-100 hover:border-blue-300 transition-all active:scale-95 shadow-sm">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                        📋 智慧貼上 (自動拆解 Google Maps 內容)
+                    </button>
                     <label class="text-[10px] text-slate-500 mb-1 block">店家名稱</label>
                     <input id="storeName" type="text" placeholder="例：蓮花泰式小吃店" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500 outline-none transition-all">
                 </div>
@@ -535,6 +539,71 @@
             if (existing.includes(tag)) return window.showCIAAlert(`⚠️ 「${tag}」已在標籤中`);
             tagsInput.value = existing.length > 0 ? current + ', ' + tag : tag;
             window.showCIAAlert(`✅ 已加入標籤：#${tag}`);
+        };
+
+        // 智慧貼上解析邏輯
+        window.smartPaste = async () => {
+            let text = "";
+            try {
+                if (navigator.clipboard && navigator.clipboard.readText) {
+                    text = await navigator.clipboard.readText();
+                }
+            } catch (e) {}
+            
+            if (!text || text.trim().length === 0) {
+                text = prompt('無法自動讀取剪貼簿。\n請在此手動貼上 Google Maps 或任何帶有地址的分享文字：');
+            }
+
+            if (!text || text.trim().length === 0) return;
+
+            // 切割換行，過濾空白行
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            
+            let name = "";
+            let address = "";
+            let area = "";
+
+            if (lines.length >= 2) {
+                name = lines[0]; // 第一行通常是店名
+                
+                // 找尋看起來最像地址的行
+                const addressLineMatch = lines.find(l => /(市|縣|區|鄉|鎮|路|街|段|號)/.test(l) && l !== name);
+                if (addressLineMatch) {
+                    address = addressLineMatch;
+                } else {
+                    // 如果沒有找到典型的地址特徵，找一個不是網址與純數字電話的行來碰碰運氣
+                    const fallbackLine = lines.find(l => l !== name && !l.startsWith('http') && !/^[\d\s\-()]+$/.test(l));
+                    if (fallbackLine) address = fallbackLine;
+                }
+            } else if (lines.length === 1) {
+                // 如果是一整行 (例如只有手動打的字)，可能以空格分隔
+                const parts = lines[0].split('http'); // 排除網址
+                name = parts[0].trim();
+                address = parts[0].trim(); // 單行的情況先假定店名和地址混合在一起，全部放進去讓使用者手動刪
+            }
+
+            // 📍 附贈的超強功能：從地址中自動提煉「區域」
+            if (address) {
+                // 尋找出現在「市/縣」後面的「區/鎮/鄉/市」 (最多取3個字)
+                const areaMatch = address.match(/(?:市|縣)(.{1,3}?(?:區|鄉|鎮|市))/);
+                if (areaMatch && areaMatch[1]) {
+                    area = areaMatch[1];
+                } else {
+                    // 例外：沒有提到縣市，只有區
+                    const backupMatch = address.match(/(.{1,3}?(?:區|鄉|鎮))/);
+                    if (backupMatch && backupMatch[1] && backupMatch[1].length >= 2) {
+                        area = backupMatch[1];
+                    }
+                }
+            }
+
+            if (name) nameInput.value = name;
+            if (address) addressInput.value = address;
+            if (area) areaInput.value = area;
+
+            // 加入震動回饋與提示
+            if (navigator.vibrate) navigator.vibrate(50);
+            window.showCIAAlert('📋 智慧解析完成！請確認資料正確性。');
         };
 
         window.saveEntry = async () => {
