@@ -551,7 +551,7 @@
             } catch (e) {}
             
             if (!text || text.trim().length === 0) {
-                text = prompt('無法自動讀取剪貼簿。\n請在此手動貼上 Google Maps 或任何帶有地址的分享文字：');
+                text = prompt('無法自動讀取剪貼簿。\n請在此手動貼上 Google Maps 分享的文字：');
             }
 
             if (!text || text.trim().length === 0) return;
@@ -566,30 +566,35 @@
             if (lines.length >= 2) {
                 name = lines[0]; // 第一行通常是店名
                 
-                // 找尋看起來最像地址的行
                 const addressLineMatch = lines.find(l => /(市|縣|區|鄉|鎮|路|街|段|號)/.test(l) && l !== name);
                 if (addressLineMatch) {
                     address = addressLineMatch;
                 } else {
-                    // 如果沒有找到典型的地址特徵，找一個不是網址與純數字電話的行來碰碰運氣
                     const fallbackLine = lines.find(l => l !== name && !l.startsWith('http') && !/^[\d\s\-()]+$/.test(l));
                     if (fallbackLine) address = fallbackLine;
                 }
             } else if (lines.length === 1) {
-                // 如果是一整行 (例如只有手動打的字)，可能以空格分隔
+                // 如果是一整行，先檢查是否「只有網址」
+                if (lines[0].startsWith('http')) {
+                    return window.showCIAAlert('⚠️ 貼上的內容似乎只有網址！請從地圖按「分享」來複製完整店名與地址。');
+                }
+                
                 const parts = lines[0].split('http'); // 排除網址
                 name = parts[0].trim();
-                address = parts[0].trim(); // 單行的情況先假定店名和地址混合在一起，全部放進去讓使用者手動刪
+                address = parts[0].trim(); 
+            }
+
+            // 防呆：如果拆完發現什麼都沒有
+            if (!name && !address) {
+                return window.showCIAAlert('⚠️ 無法解析！請確保貼上的文字包含店名或地址。');
             }
 
             // 📍 附贈的超強功能：從地址中自動提煉「區域」
             if (address) {
-                // 尋找出現在「市/縣」後面的「區/鎮/鄉/市」 (最多取3個字)
                 const areaMatch = address.match(/(?:市|縣)(.{1,3}?(?:區|鄉|鎮|市))/);
                 if (areaMatch && areaMatch[1]) {
                     area = areaMatch[1];
                 } else {
-                    // 例外：沒有提到縣市，只有區
                     const backupMatch = address.match(/(.{1,3}?(?:區|鄉|鎮))/);
                     if (backupMatch && backupMatch[1] && backupMatch[1].length >= 2) {
                         area = backupMatch[1];
@@ -601,7 +606,6 @@
             if (address) addressInput.value = address;
             if (area) areaInput.value = area;
 
-            // 加入震動回饋與提示
             if (navigator.vibrate) navigator.vibrate(50);
             window.showCIAAlert('📋 智慧解析完成！請確認資料正確性。');
         };
