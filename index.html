@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>美味中情局 - Delicious CIA</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;700;900&display=swap');
         
@@ -80,7 +81,7 @@
             <div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-white font-black shadow-lg">CIA</div>
             <div>
                 <h1 class="text-xl font-black tracking-tight text-slate-800">美味中情局</h1>
-                <p class="text-[10px] mono text-orange-600 uppercase tracking-widest leading-none">INTEL LOG V2.3.1</p>
+                <p class="text-[10px] mono text-orange-600 uppercase tracking-widest leading-none">INTEL LOG V2.4.0</p>
             </div>
         </div>
         <div id="authStatus" class="text-[10px] mono text-slate-400">CONNECTING...</div>
@@ -273,11 +274,35 @@
                 </button>
             </div>
             <div class="p-6 overflow-y-auto space-y-4">
-                <button onclick="window.exportData()" class="w-full py-4 bg-slate-800 text-white rounded-2xl font-bold text-sm shadow-md flex justify-center space-x-2"><span>📥</span><span>下載備份檔案 (.json)</span></button>
-                <label class="w-full py-4 border-2 border-dashed border-slate-200 bg-slate-50 text-slate-500 rounded-2xl font-bold text-sm cursor-pointer flex justify-center space-x-2">
-                    <span>📤</span><span>上傳備份檔案復原</span>
-                    <input type="file" id="backupFileInput" class="hidden" accept=".json" onchange="window.importData(event)">
-                </label>
+                <!-- WebRTC Sync Section -->
+                <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4">
+                    <h4 class="text-xs font-bold text-indigo-800 uppercase tracking-widest mb-3 flex items-center">
+                        <span class="mr-2">⚡</span> 暗碼直連同步
+                    </h4>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="window.openSyncModal('sender')" class="flex flex-col items-center justify-center space-y-1 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-600/30 transition-all active:scale-[0.98]">
+                            <span class="text-xl">📤</span>
+                            <span class="text-[11px] font-black">產生暗碼</span>
+                            <span class="text-[9px] text-indigo-200 font-medium">(擔任發送端)</span>
+                        </button>
+                        <button onclick="window.openSyncModal('receiver')" class="flex flex-col items-center justify-center space-y-1 py-4 bg-white border-2 border-indigo-200 hover:border-indigo-400 text-indigo-700 rounded-xl shadow-sm transition-all active:scale-[0.98]">
+                            <span class="text-xl">📥</span>
+                            <span class="text-[11px] font-black">輸入接收</span>
+                            <span class="text-[9px] text-indigo-400 font-medium">(擔任接收端)</span>
+                        </button>
+                    </div>
+                    <p class="text-[10px] text-indigo-500 mt-3 text-center leading-relaxed font-medium">發送端與接收端需<span class="font-bold text-indigo-700 mx-0.5">「同時在線上」</span>才能配對。<br>手機接收時採「智能合併」，會自動覆蓋重複資料，並保留本機獨有的紀錄。</p>
+                </div>
+
+                <!-- 傳統 JSON 備份 -->
+                <div class="border-t border-slate-100 pt-4 space-y-3">
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">傳統單機備份</p>
+                    <button onclick="window.exportData()" class="w-full py-4 bg-slate-800 text-white rounded-2xl font-bold text-sm shadow-md flex justify-center space-x-2 transition-all active:scale-[0.98]"><span>📥</span><span>下載裝置備份 (.json)</span></button>
+                    <label class="w-full py-4 border-2 border-dashed border-slate-200 hover:border-slate-300 bg-slate-50 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-2xl font-bold text-sm cursor-pointer flex justify-center space-x-2 transition-all">
+                        <span>📤</span><span>上傳備份復原</span>
+                        <input type="file" id="backupFileInput" class="hidden" accept=".json" onchange="window.importData(event)">
+                    </label>
+                </div>
             </div>
         </div>
     </div>
@@ -293,6 +318,51 @@
             <div class="flex space-x-3 pt-4">
                 <button onclick="window.closeDeleteModal()" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl font-bold text-sm transition-all focus:outline-none">放棄</button>
                 <button onclick="window.confirmDelete()" class="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-2xl font-bold text-sm shadow-lg shadow-red-500/30 transition-all active:scale-[0.98] focus:outline-none">確認銷毀</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 同步連線暗碼視窗 -->
+    <div id="syncModal" class="modal-backdrop fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div class="modal-content w-full max-w-sm bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col p-6 text-center space-y-4 relative">
+            <div class="flex justify-between items-center bg-white sticky top-0 z-10 pb-2 mb-2 border-b border-slate-100">
+                <h3 id="syncModalTitle" class="font-black text-slate-800 text-lg tracking-tight">暗碼同步連線</h3>
+                <button onclick="window.closeSyncModal()" class="p-2 bg-slate-100 rounded-full text-slate-400 hover:text-slate-800 transition-colors shadow-sm focus:outline-none">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div id="syncSenderUI" class="hidden flex-col items-center space-y-4 py-4">
+                <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center animate-pulse border border-slate-200">
+                    <span class="text-3xl">📡</span>
+                </div>
+                <div>
+                    <p class="text-[11px] text-slate-500 font-bold tracking-widest uppercase mb-2">請在另一台裝置（手機）輸入此暗碼</p>
+                    <div id="syncPasscodeDisplay" class="text-5xl font-black text-indigo-600 tracking-[0.2em] mono bg-indigo-50 px-6 py-4 rounded-[1.5rem] border-2 border-indigo-200 shadow-inner">---</div>
+                </div>
+                <p class="text-[11px] font-bold text-slate-400 flex items-center space-x-1 mt-2">
+                    <svg class="w-3.5 h-3.5 animate-spin text-indigo-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <span>正在開房等待接收端連線中...</span>
+                </p>
+            </div>
+
+            <div id="syncReceiverUI" class="hidden flex-col items-center space-y-4 py-2">
+                <p class="text-[11px] text-slate-500 font-bold tracking-widest uppercase text-left w-full pl-2">輸入發送端 (電腦) 的 5 位數暗碼</p>
+                <div class="flex space-x-2 justify-center w-full">
+                    <input type="tel" id="syncInput" maxlength="5" placeholder="00000" class="w-full text-center text-4xl font-black text-indigo-600 tracking-[0.3em] mono bg-indigo-50 border-2 border-indigo-200 rounded-[1.5rem] py-4 focus:ring-4 focus:ring-indigo-500/30 outline-none transition-all placeholder:text-indigo-200/50">
+                </div>
+                <button id="syncConnectBtn" class="w-full py-4.5 bg-indigo-600 text-white rounded-2xl font-black text-[15px] shadow-lg shadow-indigo-600/30 transition-all active:scale-[0.98] mt-4 flex justify-center items-center space-x-2">
+                    <span>⚡ 開始抓取資料</span>
+                </button>
+            </div>
+            
+            <div id="syncStatusUI" class="hidden flex-col items-center space-y-4 py-6">
+                <div id="syncStatusIcon" class="w-20 h-20 rounded-full flex items-center justify-center text-4xl mb-2"></div>
+                <div>
+                    <h4 id="syncStatusHeading" class="font-black text-slate-800 text-xl tracking-tight">處理中</h4>
+                    <p id="syncStatusMsg" class="text-xs text-slate-500 mt-2 leading-relaxed px-4"></p>
+                </div>
+                <button onclick="window.closeSyncModal()" id="syncDoneBtn" class="hidden mt-4 px-8 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-full font-bold text-sm transition-all shadow-md shadow-slate-800/20 active:scale-95">關閉視窗</button>
             </div>
         </div>
     </div>
@@ -481,6 +551,142 @@
             };
             reader.readAsText(file);
         };
+
+        // WebRTC Sync Logic (暗碼直連)
+        let peer = null;
+        let conn = null;
+        const syncModal = document.getElementById('syncModal');
+        const syncSenderUI = document.getElementById('syncSenderUI');
+        const syncReceiverUI = document.getElementById('syncReceiverUI');
+        const syncStatusUI = document.getElementById('syncStatusUI');
+        const syncPasscodeDisplay = document.getElementById('syncPasscodeDisplay');
+        const syncInput = document.getElementById('syncInput');
+        
+        window.openSyncModal = (mode) => {
+            window.closeBackupModal();
+            syncModal.classList.add('show');
+            syncSenderUI.classList.add('hidden'); syncSenderUI.classList.remove('flex');
+            syncReceiverUI.classList.add('hidden'); syncReceiverUI.classList.remove('flex');
+            syncStatusUI.classList.add('hidden'); syncStatusUI.classList.remove('flex');
+            document.getElementById('syncDoneBtn').classList.add('hidden');
+            
+            if (peer) { peer.destroy(); peer = null; }
+            if (conn) { conn.close(); conn = null; }
+            
+            if (mode === 'sender') {
+                document.getElementById('syncModalTitle').innerText = '發送端：等待暗碼配對';
+                syncSenderUI.classList.remove('hidden'); syncSenderUI.classList.add('flex');
+                
+                // Generate a friendly 5 digit PIN
+                const code = Math.floor(10000 + Math.random() * 90000).toString();
+                syncPasscodeDisplay.innerText = code;
+                
+                peer = new Peer('flavor-cia-' + code);
+                
+                peer.on('open', (id) => { console.log('Sender is ready. Room ID: ' + id); });
+                
+                peer.on('connection', (c) => {
+                    conn = c;
+                    window.showSyncStatus('配對成功', '已建立安全連線，正在發射情報至接收端...', '⏳', 'bg-blue-50 text-blue-500 border-2 border-blue-200');
+                    
+                    conn.on('open', () => {
+                        conn.send({ type: 'SYNC_DATA', payload: restaurants });
+                        setTimeout(() => {
+                            window.showSyncStatus('資料傳送完成', `已成功將 ${restaurants.length} 筆情報送出！`, '✅', 'bg-green-50 text-green-500 border-2 border-green-200');
+                            document.getElementById('syncDoneBtn').classList.remove('hidden');
+                            setTimeout(() => { if(peer) peer.destroy(); }, 2000);
+                        }, 800);
+                    });
+                });
+                
+                peer.on('error', (err) => {
+                    window.showSyncStatus('頻段被佔用', '請關閉視窗重新產生一組新暗碼。', '❌', 'bg-red-50 text-red-500 border-2 border-red-200');
+                    document.getElementById('syncDoneBtn').classList.remove('hidden');
+                });
+                
+            } else if (mode === 'receiver') {
+                document.getElementById('syncModalTitle').innerText = '接收端：啟動情報抓取';
+                syncReceiverUI.classList.remove('hidden'); syncReceiverUI.classList.add('flex');
+                syncInput.value = '';
+                setTimeout(() => syncInput.focus(), 300);
+            }
+        };
+        
+        window.closeSyncModal = () => {
+            syncModal.classList.remove('show');
+            if (peer) { peer.destroy(); peer = null; }
+            if (conn) { conn.close(); conn = null; }
+        };
+        
+        window.showSyncStatus = (title, msg, icon, iconClass) => {
+            syncSenderUI.classList.add('hidden'); syncSenderUI.classList.remove('flex');
+            syncReceiverUI.classList.add('hidden'); syncReceiverUI.classList.remove('flex');
+            syncStatusUI.classList.remove('hidden'); syncStatusUI.classList.add('flex');
+            
+            document.getElementById('syncStatusHeading').innerText = title;
+            document.getElementById('syncStatusMsg').innerText = msg;
+            document.getElementById('syncStatusIcon').className = `w-20 h-20 rounded-full flex items-center justify-center text-4xl mb-3 shadow-inner ${iconClass}`;
+            document.getElementById('syncStatusIcon').innerText = icon;
+        };
+        
+        const connectBtn = document.getElementById('syncConnectBtn');
+        if (connectBtn) {
+            connectBtn.addEventListener('click', () => {
+                const code = syncInput.value.trim();
+                if (code.length !== 5) return window.showCIAAlert('⚠️ 請輸入完整的 5 位數暗碼');
+                
+                window.showSyncStatus('尋找發送端...', `正在搜尋暗碼頻道：${code}`, '📡', 'bg-indigo-50 text-indigo-500 border-2 border-indigo-200 animate-pulse');
+                
+                peer = new Peer(); 
+                peer.on('open', (id) => {
+                    conn = peer.connect('flavor-cia-' + code);
+                    
+                    const timeout = setTimeout(() => {
+                        if (!conn || !conn.open) {
+                            window.showSyncStatus('連線逾時失敗', '找不到發送端。\n請確認：1. 電腦畫面尚未關閉 2. 暗碼是否正確', '❌', 'bg-orange-50 text-orange-500 border-2 border-orange-200');
+                            document.getElementById('syncDoneBtn').classList.remove('hidden');
+                        }
+                    }, 8000);
+                    
+                    conn.on('open', () => { clearTimeout(timeout); });
+                    
+                    conn.on('data', (data) => {
+                        if (data.type === 'SYNC_DATA') {
+                            const incoming = data.payload || [];
+                            let added = 0;
+                            let updated = 0;
+                            
+                            // 智能合併邏輯 (Upsert): 保留手機新增的，遇到重複 ID 則採用電腦(發送端)傳來的資料蓋過去
+                            incoming.forEach(senderItem => {
+                                const localIdx = restaurants.findIndex(r => r.id === senderItem.id);
+                                if (localIdx > -1) {
+                                    // 找到相同的店家（ID 相同），把手機上的資料換成新傳進來的
+                                    restaurants[localIdx] = { ...senderItem };
+                                    updated++;
+                                } else {
+                                    // 手機上沒有這家店，直接新增
+                                    restaurants.push(senderItem);
+                                    added++;
+                                }
+                            });
+                            
+                            SYNC_DATA();
+                            window.showSyncStatus('情報合併完成！', `同步成功。
+本次共新增了 ${added} 筆新資料，更新了 ${updated} 筆現有資料。`, '🎉', 'bg-green-50 text-green-500 border-2 border-green-200');
+                            document.getElementById('syncDoneBtn').classList.remove('hidden');
+                            setTimeout(() => { if(peer) peer.destroy(); }, 2000);
+                        }
+                    });
+                    
+                    conn.on('close', () => { console.log('P2P connection closed'); });
+                });
+                
+                peer.on('error', (err) => {
+                     window.showSyncStatus('網路防護錯誤', '無法建立點對點連線。可能是網路防火牆阻擋。', '❌', 'bg-red-50 text-red-500 border-2 border-red-200');
+                     document.getElementById('syncDoneBtn').classList.remove('hidden');
+                });
+            });
+        }
 
         const initAuth = async () => {
             user = { uid: 'local_agent' };
