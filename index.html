@@ -81,7 +81,7 @@
             <div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-white font-black shadow-lg">CIA</div>
             <div>
                 <h1 class="text-xl font-black tracking-tight text-slate-800">美味中情局</h1>
-                <p class="text-[10px] mono text-orange-600 uppercase tracking-widest leading-none">INTEL LOG V2.5.0</p>
+                <p class="text-[10px] mono text-orange-600 uppercase tracking-widest leading-none">INTEL LOG V2.6.0</p>
             </div>
         </div>
         <div id="authStatus" class="text-[10px] mono text-slate-400">CONNECTING...</div>
@@ -181,6 +181,7 @@
                     <input id="searchInput" type="text" placeholder="🔍 搜尋店名或區域..." class="w-[70%] bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500 outline-none transition-all shadow-inner">
                     <select id="sortSelect" class="w-[30%] bg-slate-50 border border-slate-200 rounded-2xl px-2 py-3 text-xs font-bold outline-none cursor-pointer">
                         <option value="newest">最新建立</option>
+                        <option value="favorite">❤️ 收藏優先</option>
                         <option value="rating">依星等</option>
                         <option value="visited">待出任務</option>
                         <option value="area">依區域</option>
@@ -891,6 +892,13 @@
             renderChips(); renderList();
         };
 
+        window.toggleFavorite = (id) => {
+            const res = restaurants.find(r => r.id === id);
+            if (!res) return;
+            res.isFavorite = !res.isFavorite;
+            SYNC_DATA();
+        };
+
         const renderChips = () => {
             const container = document.getElementById('filterChips');
             if(!container) return;
@@ -937,6 +945,7 @@
                     case 'rating': return (b.rating || 0) - (a.rating || 0);
                     case 'visited': return (a.isVisited===b.isVisited) ? (timeB-timeA) : (a.isVisited ? 1 : -1);
                     case 'area': return (a.area || "").localeCompare((b.area || ""), 'zh-TW');
+                    case 'favorite': return (a.isFavorite===b.isFavorite) ? (timeB-timeA) : (b.isFavorite ? 1 : -1);
                     default: return timeB - timeA;
                 }
             });
@@ -967,8 +976,11 @@
                                     ${(res.tags || []).length ? res.tags.map(t => `<span class="text-[10px] text-orange-600 font-bold tracking-tight">#${t}</span>`).join('') : '<span class="text-[10px] text-slate-300">無標籤</span>'}
                                 </div>
                             </div>
-                            <div class="flex flex-col items-center justify-between space-y-3">
-                                <button onclick="event.stopPropagation(); deleteEntry('${res.id}')" class="p-2 text-slate-300 hover:text-red-500 transition-colors">
+                            <div class="flex flex-col items-center justify-between space-y-2">
+                                <button onclick="event.stopPropagation(); window.toggleFavorite('${res.id}')" class="p-2 transition-all active:scale-125 ${res.isFavorite ? 'text-pink-500 drop-shadow-[0_0_4px_rgba(236,72,153,0.4)]' : 'text-slate-200 hover:text-pink-300'}">
+                                    <svg class="w-5 h-5" fill="${res.isFavorite ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                                </button>
+                                <button onclick="event.stopPropagation(); deleteEntry('${res.id}')" class="p-2 text-slate-200 hover:text-red-500 transition-colors">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 </button>
                                 <svg class="w-4 h-4 text-slate-300 transform transition-transform ${isExpanded ? 'rotate-180 text-orange-400' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
