@@ -15,11 +15,16 @@
             --bureau-text: #1e293b;
         }
 
+        html {
+            overflow-x: hidden;
+        }
+
         body {
             background-color: var(--bureau-bg);
             font-family: 'Noto Sans TC', sans-serif;
             color: var(--bureau-text);
             overflow-x: hidden;
+            max-width: 100vw;
         }
 
         .bureau-border { border: 1px solid #e2e8f0; }
@@ -81,7 +86,7 @@
             <div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-white font-black shadow-lg">CIA</div>
             <div>
                 <h1 class="text-xl font-black tracking-tight text-slate-800">美味中情局</h1>
-                <p class="text-[10px] mono text-orange-600 uppercase tracking-widest leading-none">INTEL LOG V2.6.0</p>
+                <p class="text-[10px] mono text-orange-600 uppercase tracking-widest leading-none">INTEL LOG V2.6.1</p>
             </div>
         </div>
         <div id="authStatus" class="text-[10px] mono text-slate-400">CONNECTING...</div>
@@ -519,8 +524,16 @@
         window.startNavigation = (name, address, area) => {
             const baseQuery = address ? `${name} ${address}` : `${name} ${area}`;
             const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(baseQuery)}`;
-            window.showCIAAlert("🚀 正在為局長開啟導航系統...");
-            window.open(mapsUrl, '_blank');
+            // Use a temporary <a> element for reliable iOS navigation
+            // window.open() is unreliable on iOS PWA/home-screen mode and can blank the current page
+            const a = document.createElement('a');
+            a.href = mapsUrl;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         };
 
         window.switchTab = (tab) => {
