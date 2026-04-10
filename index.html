@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>美味中情局 - Delicious CIA</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        };
+    </script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;700;900&display=swap');
@@ -19,12 +24,18 @@
             overflow-x: hidden;
         }
 
+        html.dark {
+            --bureau-bg: #0f172a;
+            --bureau-text: #e2e8f0;
+        }
+
         body {
             background-color: var(--bureau-bg);
             font-family: 'Noto Sans TC', sans-serif;
             color: var(--bureau-text);
             overflow-x: hidden;
             max-width: 100vw;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .bureau-border { border: 1px solid #e2e8f0; }
@@ -35,6 +46,7 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         #decisionCanvas { cursor: pointer; background: #ffffff; }
+        .dark #decisionCanvas { background: #1e293b; }
         .nav-active { color: #f59e0b; }
         .nav-active svg { filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.4)); }
 
@@ -69,9 +81,21 @@
 
         /* FAB Button */
         .fab { position: fixed; bottom: 100px; right: 24px; z-index: 40; }
+
+        /* Dark Mode Toggle */
+        .dark-toggle { transition: transform 0.3s ease; }
+        .dark-toggle:hover { transform: scale(1.15); }
+        .dark-toggle:active { transform: scale(0.9); }
+
+        /* Closed-today warning badge pulse */
+        @keyframes closedPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        .closed-today-pulse { animation: closedPulse 1.5s ease-in-out infinite; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col bg-slate-50 text-slate-800">
+<body class="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300">
 
     <div id="cia-alert-container">
         <div id="cia-alert-box" class="bg-slate-900 border-2 border-amber-500 px-6 py-3 rounded-2xl shadow-2xl flex items-center space-x-3 text-white">
@@ -81,15 +105,20 @@
     </div>
 
     <!-- 頂部狀態列 -->
-    <header class="border-b bg-white/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
+    <header class="border-b border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex justify-between items-center transition-colors duration-300">
         <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-white font-black shadow-lg">CIA</div>
+            <div class="w-10 h-10 bg-slate-800 dark:bg-amber-500 rounded-xl flex items-center justify-center text-white font-black shadow-lg transition-colors duration-300">CIA</div>
             <div>
-                <h1 class="text-xl font-black tracking-tight text-slate-800">美味中情局</h1>
-                <p class="text-[10px] mono text-orange-600 uppercase tracking-widest leading-none">INTEL LOG V2.6.2</p>
+                <h1 class="text-xl font-black tracking-tight text-slate-800 dark:text-slate-100">美味中情局</h1>
+                <p class="text-[10px] mono text-orange-600 uppercase tracking-widest leading-none">INTEL LOG V2.7.0</p>
             </div>
         </div>
-        <div id="authStatus" class="text-[10px] mono text-slate-400">CONNECTING...</div>
+        <div class="flex items-center space-x-3">
+            <button id="darkModeToggle" onclick="window.toggleDarkMode()" class="dark-toggle w-9 h-9 rounded-full flex items-center justify-center text-lg bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 shadow-sm transition-colors duration-300" title="切換深色模式">
+                <span id="darkModeIcon">🌙</span>
+            </button>
+            <div id="authStatus" class="text-[10px] mono text-slate-400">CONNECTING...</div>
+        </div>
     </header>
 
     <!-- 主要內容區 -->
@@ -97,16 +126,16 @@
         
         <!-- Tab 1: 情報決策 -->
         <div id="dashboardTab" class="space-y-6 transition-all duration-300">
-            <section class="bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden shadow-sm relative">
-                <div class="p-6 pb-4 flex justify-between items-end border-b border-slate-100">
+            <section class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[2.5rem] overflow-hidden shadow-sm relative transition-colors duration-300">
+                <div class="p-6 pb-4 flex justify-between items-end border-b border-slate-100 dark:border-slate-700">
                     <div>
-                        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-widest flex items-center"><span class="mr-2">🎲</span> 決策引擎：機密解鎖</h2>
+                        <h2 class="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-widest flex items-center"><span class="mr-2">🎲</span> 決策引擎：機密解鎖</h2>
                         <p class="text-[10px] text-slate-400 mt-1">FLAVOR RANDOMIZER 2.0</p>
                     </div>
                     <!-- Area Radar Dropdown -->
                     <div class="flex flex-col items-end">
                         <label class="text-[8px] font-bold text-orange-500 uppercase tracking-widest mb-1">區域雷達鎖定 (RADAR LOCK)</label>
-                        <select id="areaRadar" class="bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl px-3 py-1.5 outline-none cursor-pointer hover:bg-slate-200 transition-colors">
+                        <select id="areaRadar" class="bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl px-3 py-1.5 outline-none cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
                             <option value="ALL">🌐 全域掃描 (All)</option>
                         </select>
                     </div>
@@ -125,12 +154,13 @@
                         </div>
 
                         <!-- Result Card (Hidden Initially) -->
-                        <div id="resultCard" class="hidden absolute inset-4 bg-white rounded-2xl shadow-2xl flex flex-col pt-6 pb-5 px-5 transform scale-95 opacity-0">
+                        <div id="resultCard" class="hidden absolute inset-4 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl flex flex-col pt-6 pb-5 px-5 transform scale-95 opacity-0">
                             <div class="flex-1 flex flex-col items-center justify-center text-center">
                                 <span id="resStatusBadge" class="text-[10px] bg-slate-100 text-slate-500 border border-slate-200 px-3 py-1 rounded-full font-bold shadow-sm mb-3">📍 限定區域</span>
-                                <h3 id="resName" class="font-black text-slate-800 text-2xl tracking-tight leading-tight line-clamp-2">餐廳名稱</h3>
+                                <h3 id="resName" class="font-black text-slate-800 dark:text-slate-100 text-2xl tracking-tight leading-tight line-clamp-2">餐廳名稱</h3>
                                 <p id="resTags" class="text-xs text-orange-600 font-bold mt-2 truncate max-w-full w-full">#標籤</p>
-                                <p id="resNote" class="text-xs text-slate-500 mt-2 italic line-clamp-2 px-2"></p>
+                                <p id="resNote" class="text-xs text-slate-500 dark:text-slate-400 mt-2 italic line-clamp-2 px-2"></p>
+                                <div id="resClosedWarning" class="hidden mt-2"></div>
                             </div>
                             
                             <button id="resNavBtn" class="mt-4 w-full py-3.5 bg-blue-600 text-white rounded-xl font-black text-sm shadow-lg shadow-blue-600/30 active:scale-[0.98] transition-all flex items-center justify-center space-x-2">
@@ -141,13 +171,13 @@
                     </div>
 
                     <div class="mt-6 flex justify-center">
-                        <button id="shuffleBtn" class="px-8 py-3.5 bg-slate-800 text-white font-black rounded-full hover:bg-slate-700 transition-all shadow-xl active:scale-95 flex items-center space-x-2 border-2 border-slate-700 hover:border-slate-600">
+                        <button id="shuffleBtn" class="px-8 py-3.5 bg-slate-800 dark:bg-amber-500 text-white font-black rounded-full hover:bg-slate-700 dark:hover:bg-amber-600 transition-all shadow-xl active:scale-95 flex items-center space-x-2 border-2 border-slate-700 dark:border-amber-400 hover:border-slate-600 dark:hover:border-amber-500">
                             <span class="text-orange-500 text-xl">⚡</span><span class="tracking-widest">開始解密抽籤</span>
                         </button>
                     </div>
                 </div>
             </section>
-            <section class="bg-white border border-slate-200 rounded-[2.5rem] p-6 shadow-sm">
+            <section class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[2.5rem] p-6 shadow-sm transition-colors duration-300">
                 <div class="mb-4">
                     <h2 class="text-sm font-bold text-orange-600 uppercase tracking-widest">🎯 今天想吃？</h2>
                     <p class="text-[10px] text-slate-400 mt-0.5">UNVISITED PICKS — 從口袋名單精選</p>
@@ -169,13 +199,13 @@
             </div>
 
             <!-- 情報資料庫主體 -->
-            <section class="bg-white border border-slate-200 rounded-[2.5rem] p-6 shadow-sm flex flex-col min-h-[400px]">
+            <section class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[2.5rem] p-6 shadow-sm flex flex-col min-h-[400px] transition-colors duration-300">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-sm font-bold text-slate-800 uppercase tracking-widest flex items-center">
+                    <h2 class="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-widest flex items-center">
                         <span class="mr-2 text-lg">🗄️</span> 情報資料庫
                     </h2>
                     <div class="flex items-center space-x-2">
-                        <button onclick="window.openBackupModal()" class="text-[10px] font-bold bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-full text-white transition-colors flex items-center shadow-lg active:scale-95">
+                        <button onclick="window.openBackupModal()" class="text-[10px] font-bold bg-slate-800 dark:bg-slate-600 hover:bg-slate-700 dark:hover:bg-slate-500 px-3 py-1.5 rounded-full text-white transition-colors flex items-center shadow-lg active:scale-95">
                             <span class="mr-1">🔄</span> 備份重組
                         </button>
                         <span id="listCount" class="text-[10px] mono bg-blue-50 px-3 py-1.5 rounded-full text-blue-600 shadow-sm">0 列情報</span>
@@ -183,8 +213,8 @@
                 </div>
 
                 <div class="flex gap-2 mb-6">
-                    <input id="searchInput" type="text" placeholder="🔍 搜尋店名或區域..." class="w-[70%] bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500 outline-none transition-all shadow-inner">
-                    <select id="sortSelect" class="w-[30%] bg-slate-50 border border-slate-200 rounded-2xl px-2 py-3 text-xs font-bold outline-none cursor-pointer">
+                    <input id="searchInput" type="text" placeholder="🔍 搜尋店名、區域或標籤..." class="w-[70%] bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-2xl px-4 py-3 text-sm dark:text-slate-200 focus:ring-2 focus:ring-orange-500 outline-none transition-all shadow-inner dark:placeholder-slate-400">
+                    <select id="sortSelect" class="w-[30%] bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-2xl px-2 py-3 text-xs font-bold outline-none cursor-pointer dark:text-slate-200">
                         <option value="newest">最新建立</option>
                         <option value="favorite">❤️ 收藏優先</option>
                         <option value="rating">依星等</option>
@@ -205,13 +235,13 @@
 
     <!-- 情報建檔與編輯 Modal -->
     <div id="entryModal" class="modal-backdrop fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-end sm:items-center justify-center p-4">
-        <div class="modal-content w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+        <div class="modal-content w-full max-w-md bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
                 <div>
-                    <h3 id="entryModalTitle" class="font-black text-slate-800 tracking-tight">情報歸檔</h3>
+                    <h3 id="entryModalTitle" class="font-black text-slate-800 dark:text-slate-100 tracking-tight">情報歸檔</h3>
                     <p class="text-[10px] mono text-orange-600">INTEL ENTRY FORM</p>
                 </div>
-                <button onclick="window.closeEntryModal()" class="p-2 bg-white rounded-full border border-slate-200 text-slate-400 hover:text-slate-800 transition-colors shadow-sm">
+                <button onclick="window.closeEntryModal()" class="p-2 bg-white dark:bg-slate-700 rounded-full border border-slate-200 dark:border-slate-600 text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors shadow-sm">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
@@ -220,7 +250,7 @@
                 <input type="hidden" id="editEntryId" value="">
                 
                 <!-- 狀態切換: 未攻克 vs 已攻克 -->
-                <div class="flex bg-slate-100 rounded-2xl p-1 relative">
+                <div class="flex bg-slate-100 dark:bg-slate-700 rounded-2xl p-1 relative">
                     <button id="tabUnvisited" onclick="window.setVisitStatus(false)" class="flex-1 py-2 text-xs font-bold rounded-xl transition-all shadow-sm bg-white text-slate-800">📌 待出任務</button>
                     <button id="tabVisited" onclick="window.setVisitStatus(true)" class="flex-1 py-2 text-xs font-bold rounded-xl transition-all text-slate-400">🌟 已攻克</button>
                 </div>
@@ -287,7 +317,7 @@
                     <label class="text-[10px] text-slate-500 mb-1 block">機密備註 (Note)</label>
                     <textarea id="storeNote" rows="2" placeholder="例：泰式炒河粉必點、假日要排隊建議平日去" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500 outline-none transition-all resize-none"></textarea>
                 </div>
-                <button id="saveEntryBtn" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-2xl transition-all shadow-md mt-4 active:scale-[0.98]">儲存情報</button>
+                <button id="saveEntryBtn" class="w-full bg-slate-800 dark:bg-amber-500 hover:bg-slate-700 dark:hover:bg-amber-600 text-white font-bold py-4 rounded-2xl transition-all shadow-md mt-4 active:scale-[0.98]">儲存情報</button>
             </div>
         </div>
     </div>
@@ -295,10 +325,10 @@
     <!-- 備份復原彈窗 -->
     <div id="backupModal" class="modal-backdrop fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-end sm:items-center justify-center p-4">
         <!-- 省略部分，與舊版相同架構 -->
-        <div class="modal-content w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+        <div class="modal-content w-full max-w-md bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
                 <div>
-                    <h3 class="font-black text-slate-800 tracking-tight">情報轉移與復原中心</h3>
+                    <h3 class="font-black text-slate-800 dark:text-slate-100 tracking-tight">情報轉移與復原中心</h3>
                 </div>
                 <button onclick="window.closeBackupModal()" class="p-2 bg-white rounded-full border border-slate-200 text-slate-400 hover:text-slate-800 transition-colors shadow-sm">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -340,11 +370,11 @@
 
     <!-- 刪除確認防呆視窗 -->
     <div id="deleteModal" class="modal-backdrop fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-        <div class="modal-content w-full max-w-sm bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col p-6 text-center space-y-4">
+        <div class="modal-content w-full max-w-sm bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col p-6 text-center space-y-4">
             <div class="w-16 h-16 mx-auto bg-red-50 text-red-500 rounded-full flex items-center justify-center -mb-2 shadow-inner border border-red-100">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
             </div>
-            <h3 class="font-black text-slate-800 text-xl tracking-tight">危險：確認銷毀情報？</h3>
+            <h3 class="font-black text-slate-800 dark:text-slate-100 text-xl tracking-tight">危險：確認銷毀情報？</h3>
             <p class="text-[13px] text-slate-500">即將永久銷毀「<span id="deleteModalTargetName" class="font-bold text-slate-900 border-b border-slate-300 pb-0.5"></span>」的機密。此動作無法復原！</p>
             <div class="flex space-x-3 pt-4">
                 <button onclick="window.closeDeleteModal()" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl font-bold text-sm transition-all focus:outline-none">放棄</button>
@@ -355,11 +385,11 @@
 
     <!-- 重複地址確認視窗 -->
     <div id="duplicateModal" class="modal-backdrop fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-        <div class="modal-content w-full max-w-sm bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col p-6 text-center space-y-4">
+        <div class="modal-content w-full max-w-sm bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col p-6 text-center space-y-4">
             <div class="w-16 h-16 mx-auto bg-amber-50 text-amber-500 rounded-full flex items-center justify-center -mb-2 shadow-inner border border-amber-100">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
             </div>
-            <h3 class="font-black text-slate-800 text-xl tracking-tight">偵測到重複地址</h3>
+            <h3 class="font-black text-slate-800 dark:text-slate-100 text-xl tracking-tight">偵測到重複地址</h3>
             <p id="duplicateModalMsg" class="text-[13px] text-slate-500 leading-relaxed"></p>
             <div class="flex space-x-3 pt-4">
                 <button onclick="window.closeDuplicateModal(false)" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl font-bold text-sm transition-all focus:outline-none">取消建檔</button>
@@ -370,7 +400,7 @@
 
     <!-- 同步連線暗碼視窗 -->
     <div id="syncModal" class="modal-backdrop fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-        <div class="modal-content w-full max-w-sm bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col p-6 text-center space-y-4 relative">
+        <div class="modal-content w-full max-w-sm bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col p-6 text-center space-y-4 relative">
             <div class="flex justify-between items-center bg-white sticky top-0 z-10 pb-2 mb-2 border-b border-slate-100">
                 <h3 id="syncModalTitle" class="font-black text-slate-800 text-lg tracking-tight">暗碼同步連線</h3>
                 <button onclick="window.closeSyncModal()" class="p-2 bg-slate-100 rounded-full text-slate-400 hover:text-slate-800 transition-colors shadow-sm focus:outline-none">
@@ -414,12 +444,12 @@
     </div>
 
     <!-- 底部導覽列 -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-slate-200 px-6 pb-8 pt-3 flex justify-around items-center z-50">
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-800/90 backdrop-blur-lg border-t border-slate-200 dark:border-slate-700 px-6 pb-8 pt-3 flex justify-around items-center z-50 transition-colors duration-300">
         <button onclick="switchTab('dashboard')" id="navDashboard" class="flex flex-col items-center space-y-1 nav-active transition-colors">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
             <span class="text-[10px] font-bold uppercase tracking-widest">情報決策</span>
         </button>
-        <button onclick="switchTab('archive')" id="navArchive" class="flex flex-col items-center space-y-1 text-slate-400 transition-colors">
+        <button onclick="switchTab('archive')" id="navArchive" class="flex flex-col items-center space-y-1 text-slate-400 dark:text-slate-500 transition-colors">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
             <span class="text-[10px] font-bold uppercase tracking-widest">情報資料庫</span>
         </button>
@@ -985,13 +1015,14 @@
             let filtered = restaurants.filter(res => {
                 const nameMatch = (res.name || "").toLowerCase().includes(queryTerm);
                 const areaMatch = cleanArea(res.area || "").includes(cleanArea(queryTerm));
+                const tagMatch = (res.tags || []).some(t => t.toLowerCase().includes(queryTerm));
                 
                 let chipMatch = true;
                 if(selectedFilterChip) {
                     if(selectedFilterChip.startsWith('#')) chipMatch = (res.tags || []).includes(selectedFilterChip.substring(1));
                     else chipMatch = res.area === selectedFilterChip;
                 }
-                return (nameMatch || areaMatch) && chipMatch;
+                return (nameMatch || areaMatch || tagMatch) && chipMatch;
             });
 
             filtered.sort((a, b) => {
@@ -1019,7 +1050,7 @@
                     : `<span class="flex items-center space-x-1 text-[9px] bg-slate-100 text-slate-500 border border-slate-200 px-2 py-0.5 rounded-full font-bold shadow-sm"><span>📌</span><span>待出任務</span></span>`;
                 
                 return `
-                <div class="bg-white rounded-[2rem] border border-slate-100 flex flex-col transition-all shadow-sm overflow-hidden ${isExpanded ? 'expanded ring-2 ring-orange-500/20 bg-slate-50' : 'hover:bg-slate-50'}">
+                <div class="bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-100 dark:border-slate-700 flex flex-col transition-all shadow-sm overflow-hidden ${isExpanded ? 'expanded ring-2 ring-orange-500/20 bg-slate-50 dark:bg-slate-750' : 'hover:bg-slate-50 dark:hover:bg-slate-750'}">
                     <div onclick="toggleExpand('${res.id}')" class="p-5 cursor-pointer select-none">
                         <div class="flex justify-between items-start">
                             <div class="flex-1 min-w-0">
@@ -1027,7 +1058,7 @@
                                     ${statusBadge}
                                     <span class="text-[9px] font-bold px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded-full shadow-sm">${res.area || '未知'}</span>
                                 </div>
-                                <h3 class="font-black text-slate-800 text-lg tracking-tight truncate">${res.name}</h3>
+                                <h3 class="font-black text-slate-800 dark:text-slate-100 text-lg tracking-tight truncate">${res.name}</h3>
                                 <div class="flex flex-wrap gap-x-2 gap-y-1 mt-1">
                                     ${(res.tags || []).length ? res.tags.map(t => `<span class="text-[10px] text-orange-600 font-bold tracking-tight">#${t}</span>`).join('') : '<span class="text-[10px] text-slate-300">無標籤</span>'}
                                 </div>
@@ -1042,17 +1073,17 @@
                                 <svg class="w-4 h-4 text-slate-300 transform transition-transform ${isExpanded ? 'rotate-180 text-orange-400' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
                             </div>
                         </div>
-                        ${res.note ? `<p class="text-[11px] text-slate-500 mt-3 pt-2 border-t border-slate-100 italic line-clamp-2">「 ${res.note} 」</p>` : ''}
+                        ${res.note ? `<p class="text-[11px] text-slate-500 dark:text-slate-400 mt-3 pt-2 border-t border-slate-100 dark:border-slate-700 italic line-clamp-2">「 ${res.note} 」</p>` : ''}
                     </div>
                     
                     <!-- 展開的操作 -->
-                    <div class="card-expand px-5 bg-white">
-                        <div class="py-4 border-t border-slate-100 space-y-3">
-                            <div><p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">精確地址</p><p class="text-xs text-slate-700 font-medium">${res.address || '未提供地址'}</p></div>
-                            ${(res.openTime || res.closeTime) ? `<div class="flex items-center space-x-2"><span class="text-[10px] text-slate-400 font-bold">🕐</span><p class="text-xs text-slate-700 font-medium">${res.openTime || '??:??'} ～ ${res.closeTime || '??:??'}</p></div>` : ''}
+                    <div class="card-expand px-5 bg-white dark:bg-slate-800">
+                        <div class="py-4 border-t border-slate-100 dark:border-slate-700 space-y-3">
+                            <div><p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">精確地址</p><p class="text-xs text-slate-700 dark:text-slate-300 font-medium">${res.address || '未提供地址'}</p></div>
+                            ${(res.openTime || res.closeTime) ? `<div class="flex items-center space-x-2"><span class="text-[10px] text-slate-400 font-bold">🕐</span><p class="text-xs text-slate-700 dark:text-slate-300 font-medium">${res.openTime || '??:??'} ～ ${res.closeTime || '??:??'}</p></div>` : ''}
                             ${(res.closedDays && res.closedDays.length > 0) ? `<div class="flex items-center space-x-2"><span class="text-[10px] text-slate-400 font-bold">📅</span><p class="text-xs font-medium"><span class="text-slate-400">公休：</span><span class="text-red-500 font-bold">週${res.closedDays.join('、週')}</span></p></div>` : ''}
                             <div class="grid grid-cols-2 gap-3 mt-2">
-                                <button onclick="event.stopPropagation(); window.editEntry('${res.id}')" class="flex items-center justify-center space-x-2 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl font-bold text-xs transition-all">
+                                <button onclick="event.stopPropagation(); window.editEntry('${res.id}')" class="flex items-center justify-center space-x-2 py-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-2xl font-bold text-xs transition-all">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     <span>編輯情報</span>
                                 </button>
@@ -1166,6 +1197,17 @@
             }, 80);
         }
 
+        // 智慧公休偵測
+        const getTodayDayName = () => {
+            const dayMap = ['日', '一', '二', '三', '四', '五', '六'];
+            return dayMap[new Date().getDay()];
+        };
+
+        const isClosedToday = (closedDays) => {
+            if (!closedDays || closedDays.length === 0) return false;
+            return closedDays.includes(getTodayDayName());
+        };
+
         function finishDecrypt(winner) {
             
             decryptText.classList.remove('glitch-text', 'text-green-400');
@@ -1180,6 +1222,16 @@
                 resName.innerText = winner.name;
                 resTags.innerText = (winner.tags && winner.tags.length > 0) ? winner.tags.map(t=>`#${t}`).join(' ') : (winner.area === '萬用靈感' ? '#CIA秘密推薦' : '#無標籤');
                 resNote.innerText = winner.note ? `「 ${winner.note} 」` : '';
+
+                // 公休日智慧警告
+                const closedWarning = document.getElementById('resClosedWarning');
+                if (winner.area !== '萬用靈感' && isClosedToday(winner.closedDays)) {
+                    closedWarning.classList.remove('hidden');
+                    closedWarning.innerHTML = `<span class="closed-today-pulse inline-flex items-center space-x-1 text-[11px] bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-700 px-3 py-1.5 rounded-full font-bold shadow-sm"><span>⚠️</span><span>注意：今天（週${getTodayDayName()}）為此店公休日</span></span>`;
+                } else {
+                    closedWarning.classList.add('hidden');
+                    closedWarning.innerHTML = '';
+                }
                 
                 if (winner.area === '萬用靈感') {
                     resStatusBadge.innerHTML = '💡 靈感發想';
@@ -1268,6 +1320,29 @@
             }).join('');
         };
 
+
+        // Dark Mode 深色模式
+        const DARK_KEY = 'cia_dark_mode';
+        window.toggleDarkMode = () => {
+            const html = document.documentElement;
+            const isDark = html.classList.toggle('dark');
+            localStorage.setItem(DARK_KEY, isDark ? 'true' : 'false');
+            document.getElementById('darkModeIcon').innerText = isDark ? '☀️' : '🌙';
+        };
+        // 初始化 dark mode（根據 localStorage 或系統偏好）
+        (() => {
+            const saved = localStorage.getItem(DARK_KEY);
+            let isDark = false;
+            if (saved !== null) {
+                isDark = saved === 'true';
+            } else {
+                isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            }
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('darkModeIcon').innerText = '☀️';
+            }
+        })();
 
         // 所有函式定義完成後，才啟動初始化
         initAuth();
