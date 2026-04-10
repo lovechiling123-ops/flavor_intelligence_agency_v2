@@ -110,7 +110,7 @@
             <div class="w-10 h-10 bg-slate-800 dark:bg-amber-500 rounded-xl flex items-center justify-center text-white font-black shadow-lg transition-colors duration-300">CIA</div>
             <div>
                 <h1 class="text-xl font-black tracking-tight text-slate-800 dark:text-slate-100">美味中情局</h1>
-                <p class="text-[10px] mono text-orange-600 uppercase tracking-widest leading-none">INTEL LOG V2.7.0</p>
+                <p class="text-[10px] mono text-orange-600 uppercase tracking-widest leading-none">INTEL LOG V2.7.1</p>
             </div>
         </div>
         <div class="flex items-center space-x-3">
@@ -267,23 +267,23 @@
                     </div>
                 </div>
 
-                <div class="border-t border-slate-100 pt-4 mt-2">
-                    <label class="text-[10px] text-slate-500 mb-1 block">店家名稱</label>
-                    <input id="storeName" type="text" placeholder="例：蓮花泰式小吃店" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500 outline-none transition-all">
+                <div class="border-t border-slate-100 dark:border-slate-700 pt-4 mt-2">
+                    <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">店家名稱</label>
+                    <input id="storeName" type="text" placeholder="例：蓮花泰式小吃店" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm text-slate-800 dark:text-slate-100 dark:placeholder-slate-400 focus:ring-2 focus:ring-orange-500 outline-none transition-all">
                 </div>
                 <div>
-                    <label class="text-[10px] text-slate-500 mb-1 block">精確地址 (全台解析)</label>
-                    <input id="storeAddress" type="text" placeholder="貼入地址後系統自動偵測行政區..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500 outline-none transition-all">
+                    <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">精確地址 (全台解析)</label>
+                    <input id="storeAddress" type="text" placeholder="貼入地址後系統自動偵測行政區..." class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm text-slate-800 dark:text-slate-100 dark:placeholder-slate-400 focus:ring-2 focus:ring-orange-500 outline-none transition-all">
                     <span id="address-error" class="text-[10px] text-red-500 italic mt-1 hidden block pl-1">⚠️ 無法自動辨識行政區，請手動輸入。</span>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="text-[10px] text-slate-500 mb-1 block">所屬區域</label>
-                        <input id="storeArea" type="text" placeholder="例：新莊區" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500 outline-none transition-all">
+                        <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">所屬區域</label>
+                        <input id="storeArea" type="text" placeholder="例：新莊區" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm text-slate-800 dark:text-slate-100 dark:placeholder-slate-400 focus:ring-2 focus:ring-orange-500 outline-none transition-all">
                     </div>
                     <div>
-                        <label class="text-[10px] text-slate-500 mb-1 block">特色標籤</label>
-                        <input id="storeTags" type="text" placeholder="例：泰式, CP高" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+                        <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">特色標籤</label>
+                        <input id="storeTags" type="text" placeholder="例：泰式, CP高" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm text-slate-800 dark:text-slate-100 dark:placeholder-slate-400 focus:ring-2 focus:ring-orange-500 outline-none">
                     </div>
                 </div>
                 <!-- 標籤快速推薦泡泡 -->
@@ -291,31 +291,31 @@
 
                 <!-- 營業時間 -->
                 <div>
-                    <label class="text-[10px] text-slate-500 mb-1 block">🕐 營業時間 <span class="text-slate-300">(選填)</span></label>
+                    <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">🕐 營業時間 <span class="text-slate-300 dark:text-slate-500">(選填)</span></label>
                     <div class="flex items-center space-x-2">
-                        <input id="storeOpenTime" type="time" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500 outline-none transition-all text-center">
+                        <input id="storeOpenTime" type="time" class="flex-1 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 outline-none transition-all text-center">
                         <span class="text-slate-400 font-bold text-sm">～</span>
-                        <input id="storeCloseTime" type="time" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500 outline-none transition-all text-center">
+                        <input id="storeCloseTime" type="time" class="flex-1 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 outline-none transition-all text-center">
                     </div>
                 </div>
 
                 <!-- 公休日 -->
                 <div>
-                    <label class="text-[10px] text-slate-500 mb-1 block">📅 公休日 <span class="text-slate-300">(選填，點選即可)</span></label>
+                    <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">📅 公休日 <span class="text-slate-300 dark:text-slate-500">(選填，點選即可)</span></label>
                     <div id="closedDaysContainer" class="flex justify-between gap-1.5">
-                        <button type="button" data-day="一" class="closed-day-btn flex-1 py-2.5 rounded-xl text-xs font-bold border border-slate-200 bg-slate-50 text-slate-400 transition-all active:scale-95">一</button>
-                        <button type="button" data-day="二" class="closed-day-btn flex-1 py-2.5 rounded-xl text-xs font-bold border border-slate-200 bg-slate-50 text-slate-400 transition-all active:scale-95">二</button>
-                        <button type="button" data-day="三" class="closed-day-btn flex-1 py-2.5 rounded-xl text-xs font-bold border border-slate-200 bg-slate-50 text-slate-400 transition-all active:scale-95">三</button>
-                        <button type="button" data-day="四" class="closed-day-btn flex-1 py-2.5 rounded-xl text-xs font-bold border border-slate-200 bg-slate-50 text-slate-400 transition-all active:scale-95">四</button>
-                        <button type="button" data-day="五" class="closed-day-btn flex-1 py-2.5 rounded-xl text-xs font-bold border border-slate-200 bg-slate-50 text-slate-400 transition-all active:scale-95">五</button>
-                        <button type="button" data-day="六" class="closed-day-btn flex-1 py-2.5 rounded-xl text-xs font-bold border border-slate-200 bg-slate-50 text-slate-400 transition-all active:scale-95">六</button>
-                        <button type="button" data-day="日" class="closed-day-btn flex-1 py-2.5 rounded-xl text-xs font-bold border border-slate-200 bg-slate-50 text-slate-400 transition-all active:scale-95">日</button>
+                        <button type="button" data-day="一" class="closed-day-btn flex-1 py-2.5 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-400 transition-all active:scale-95">一</button>
+                        <button type="button" data-day="二" class="closed-day-btn flex-1 py-2.5 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-400 transition-all active:scale-95">二</button>
+                        <button type="button" data-day="三" class="closed-day-btn flex-1 py-2.5 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-400 transition-all active:scale-95">三</button>
+                        <button type="button" data-day="四" class="closed-day-btn flex-1 py-2.5 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-400 transition-all active:scale-95">四</button>
+                        <button type="button" data-day="五" class="closed-day-btn flex-1 py-2.5 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-400 transition-all active:scale-95">五</button>
+                        <button type="button" data-day="六" class="closed-day-btn flex-1 py-2.5 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-400 transition-all active:scale-95">六</button>
+                        <button type="button" data-day="日" class="closed-day-btn flex-1 py-2.5 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-400 transition-all active:scale-95">日</button>
                     </div>
                 </div>
 
                 <div>
-                    <label class="text-[10px] text-slate-500 mb-1 block">機密備註 (Note)</label>
-                    <textarea id="storeNote" rows="2" placeholder="例：泰式炒河粉必點、假日要排隊建議平日去" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500 outline-none transition-all resize-none"></textarea>
+                    <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">機密備註 (Note)</label>
+                    <textarea id="storeNote" rows="2" placeholder="例：泰式炒河粉必點、假日要排隊建議平日去" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm text-slate-800 dark:text-slate-100 dark:placeholder-slate-400 focus:ring-2 focus:ring-orange-500 outline-none transition-all resize-none"></textarea>
                 </div>
                 <button id="saveEntryBtn" class="w-full bg-slate-800 dark:bg-amber-500 hover:bg-slate-700 dark:hover:bg-amber-600 text-white font-bold py-4 rounded-2xl transition-all shadow-md mt-4 active:scale-[0.98]">儲存情報</button>
             </div>
@@ -401,9 +401,9 @@
     <!-- 同步連線暗碼視窗 -->
     <div id="syncModal" class="modal-backdrop fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
         <div class="modal-content w-full max-w-sm bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col p-6 text-center space-y-4 relative">
-            <div class="flex justify-between items-center bg-white sticky top-0 z-10 pb-2 mb-2 border-b border-slate-100">
-                <h3 id="syncModalTitle" class="font-black text-slate-800 text-lg tracking-tight">暗碼同步連線</h3>
-                <button onclick="window.closeSyncModal()" class="p-2 bg-slate-100 rounded-full text-slate-400 hover:text-slate-800 transition-colors shadow-sm focus:outline-none">
+            <div class="flex justify-between items-center bg-white dark:bg-slate-800 sticky top-0 z-10 pb-2 mb-2 border-b border-slate-100 dark:border-slate-700">
+                <h3 id="syncModalTitle" class="font-black text-slate-800 dark:text-slate-100 text-lg tracking-tight">暗碼同步連線</h3>
+                <button onclick="window.closeSyncModal()" class="p-2 bg-slate-100 dark:bg-slate-700 rounded-full text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors shadow-sm focus:outline-none">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
@@ -435,7 +435,7 @@
             <div id="syncStatusUI" class="hidden flex-col items-center space-y-4 py-6">
                 <div id="syncStatusIcon" class="w-20 h-20 rounded-full flex items-center justify-center text-4xl mb-2"></div>
                 <div>
-                    <h4 id="syncStatusHeading" class="font-black text-slate-800 text-xl tracking-tight">處理中</h4>
+                    <h4 id="syncStatusHeading" class="font-black text-slate-800 dark:text-slate-100 text-xl tracking-tight">處理中</h4>
                     <p id="syncStatusMsg" class="text-xs text-slate-500 mt-2 leading-relaxed px-4"></p>
                 </div>
                 <button onclick="window.closeSyncModal()" id="syncDoneBtn" class="hidden mt-4 px-8 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-full font-bold text-sm transition-all shadow-md shadow-slate-800/20 active:scale-95">關閉視窗</button>
@@ -520,11 +520,11 @@
                 if (selectedClosedDays.includes(day)) {
                     selectedClosedDays = selectedClosedDays.filter(d => d !== day);
                     btn.classList.remove('bg-red-500', 'text-white', 'border-red-500', 'shadow-sm');
-                    btn.classList.add('bg-slate-50', 'text-slate-400', 'border-slate-200');
+                    btn.classList.add('bg-slate-50', 'dark:bg-slate-700', 'text-slate-400', 'border-slate-200', 'dark:border-slate-600');
                 } else {
                     selectedClosedDays.push(day);
                     btn.classList.add('bg-red-500', 'text-white', 'border-red-500', 'shadow-sm');
-                    btn.classList.remove('bg-slate-50', 'text-slate-400', 'border-slate-200');
+                    btn.classList.remove('bg-slate-50', 'dark:bg-slate-700', 'text-slate-400', 'border-slate-200', 'dark:border-slate-600');
                 }
             });
         });
@@ -533,7 +533,7 @@
             selectedClosedDays = [];
             document.querySelectorAll('.closed-day-btn').forEach(btn => {
                 btn.classList.remove('bg-red-500', 'text-white', 'border-red-500', 'shadow-sm');
-                btn.classList.add('bg-slate-50', 'text-slate-400', 'border-slate-200');
+                btn.classList.add('bg-slate-50', 'dark:bg-slate-700', 'text-slate-400', 'border-slate-200', 'dark:border-slate-600');
             });
         };
         
@@ -542,10 +542,10 @@
             document.querySelectorAll('.closed-day-btn').forEach(btn => {
                 if (selectedClosedDays.includes(btn.dataset.day)) {
                     btn.classList.add('bg-red-500', 'text-white', 'border-red-500', 'shadow-sm');
-                    btn.classList.remove('bg-slate-50', 'text-slate-400', 'border-slate-200');
+                    btn.classList.remove('bg-slate-50', 'dark:bg-slate-700', 'text-slate-400', 'border-slate-200', 'dark:border-slate-600');
                 } else {
                     btn.classList.remove('bg-red-500', 'text-white', 'border-red-500', 'shadow-sm');
-                    btn.classList.add('bg-slate-50', 'text-slate-400', 'border-slate-200');
+                    btn.classList.add('bg-slate-50', 'dark:bg-slate-700', 'text-slate-400', 'border-slate-200', 'dark:border-slate-600');
                 }
             });
         };
