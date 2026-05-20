@@ -287,9 +287,11 @@
                     </div>
                     <div>
                         <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">特色標籤</label>
-                        <input id="storeTags" type="text" placeholder="例：泰式, CP高" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm text-slate-800 dark:text-slate-100 dark:placeholder-slate-400 focus:ring-2 focus:ring-orange-500 outline-none">
+                        <input id="storeTags" type="text" placeholder="例：泰式 CP高 海鮮（用空格、逗號或頓號分開）" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm text-slate-800 dark:text-slate-100 dark:placeholder-slate-400 focus:ring-2 focus:ring-orange-500 outline-none">
                     </div>
                 </div>
+                <!-- 即時標籤預覽 -->
+                <div id="tagPreview" class="flex flex-wrap gap-1.5 min-h-0"></div>
                 <!-- 標籤快速推薦泡泡 -->
                 <div id="tagSuggestions" class="flex flex-wrap gap-1.5 mt-1"></div>
 
@@ -701,6 +703,7 @@
             resetClosedDaysUI();
             document.getElementById('entryModalTitle').innerText = '新增情報歸檔';
             window.setVisitStatus(false);
+            if (typeof renderTagPreview === 'function') renderTagPreview();
             if (typeof renderTagSuggestions === 'function') renderTagSuggestions();
             entryModal.classList.add('show');
         };
@@ -959,6 +962,26 @@
             }
         });
         
+        // 標籤解析：支援逗號、頓號、空格分隔
+        const parseTags = (raw) => {
+            if (!raw || !raw.trim()) return [];
+            return raw.split(/[,，、\s]+/).map(t => t.trim()).filter(t => t !== '');
+        };
+
+        // 即時標籤預覽
+        const tagPreviewContainer = document.getElementById('tagPreview');
+        const renderTagPreview = () => {
+            if (!tagPreviewContainer) return;
+            const tags = parseTags(tagsInput.value);
+            if (tags.length === 0) {
+                tagPreviewContainer.innerHTML = '';
+                return;
+            }
+            tagPreviewContainer.innerHTML = `<span class="text-[9px] text-slate-400 w-full">將儲存為 ${tags.length} 個標籤：</span>` +
+                tags.map(t => `<span class="px-2.5 py-1 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-700 rounded-full text-[10px] font-bold">#${t}</span>`).join('');
+        };
+        tagsInput.addEventListener('input', renderTagPreview);
+
         // 標籤自動推薦
         const tagSuggestionsContainer = document.getElementById('tagSuggestions');
         const renderTagSuggestions = () => {
@@ -971,10 +994,11 @@
                 sorted.map(([tag]) => `<button type="button" onclick="window.addSuggestedTag('${tag}')" class="px-2.5 py-1 bg-orange-50 text-orange-600 border border-orange-200 rounded-full text-[10px] font-bold hover:bg-orange-100 active:scale-95 transition-all">#${tag}</button>`).join('');
         };
         window.addSuggestedTag = (tag) => {
-            const current = tagsInput.value.trim();
-            const existing = current ? current.split(',').map(t => t.trim()) : [];
+            const existing = parseTags(tagsInput.value);
             if (existing.includes(tag)) return window.showCIAAlert(`⚠️ 「${tag}」已在標籤中`);
-            tagsInput.value = existing.length > 0 ? current + ', ' + tag : tag;
+            existing.push(tag);
+            tagsInput.value = existing.join('、');
+            renderTagPreview();
             window.showCIAAlert(`✅ 已加入標籤：#${tag}`);
         };
 
@@ -1009,7 +1033,7 @@
                 }
             }
             
-            const tags = tagsInput.value ? tagsInput.value.split(',').map(t => t.trim()).filter(t => t !== "") : [];
+            const tags = parseTags(tagsInput.value);
             // Filter out empty time slots
             const timeSlots = formTimeSlots.filter(s => s.open || s.close);
             // Keep legacy fields for backward compat
@@ -1035,6 +1059,7 @@
                 nameInput.value = ''; addressInput.value = ''; areaInput.value = ''; 
                 tagsInput.value = ''; noteInput.value = '';
                 formTimeSlots = []; renderTimeSlots();
+                if (typeof renderTagPreview === 'function') renderTagPreview();
                 resetClosedDaysUI();
                 window.setVisitStatus(false);
             }
@@ -1045,13 +1070,14 @@
             const res = restaurants.find(r => r.id === id);
             if (!res) return;
             idInput.value = res.id; nameInput.value = res.name; addressInput.value = res.address;
-            areaInput.value = res.area; tagsInput.value = (res.tags || []).join(', '); noteInput.value = res.note;
+            areaInput.value = res.area; tagsInput.value = (res.tags || []).join('、'); noteInput.value = res.note;
             // Load time slots (backward compatible)
             formTimeSlots = normalizeTimeSlots(res).map(s => ({...s}));
             renderTimeSlots();
             setClosedDaysUI(res.closedDays || []);
             document.getElementById('entryModalTitle').innerText = '情報編輯與更新';
             window.setVisitStatus(res.isVisited || false); window.setRating(res.rating || 0);
+            if (typeof renderTagPreview === 'function') renderTagPreview();
             if (typeof renderTagSuggestions === 'function') renderTagSuggestions();
             entryModal.classList.add('show');
         };
